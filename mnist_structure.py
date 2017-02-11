@@ -4,6 +4,8 @@ Created on Sat Feb 11 21:15:04 2017
 
 https://lasagne.readthedocs.io/en/latest/user/tutorial.html
 https://github.com/Lasagne/Lasagne/blob/master/examples/mnist.py
+
+Structure of the code but not code itself
 """
 
 from __future__ import print_function
@@ -21,17 +23,17 @@ import lasagne
 def load_dataset():
     pass
 
+
 def build_mlp(input_var=None):
     pass
+
 
 def build_custom_mlp(input_var=None, depth=2, width=800, drop_input=.2, drop_hidden=.5):
     pass
 
+
 def build_cnn(input_var=None):
     pass
-
-    
-
 
 
 def main(model='mlp', num_epochs=500):
@@ -55,9 +57,6 @@ def main(model='mlp', num_epochs=500):
     # Compute and print the test error
     #   - for batch in iterate_minibatches(): 
     # Optionally, dump the network weights to a file
-
-    
-
 
     print('Done')
     #assert False, "-- FORCED STOP --"
