@@ -25,6 +25,13 @@ def load_dataset():
 
 
 def build_mlp(input_var=None):
+    # Input layer
+    # 20% dropout
+    # Dense 800-unit layer with linear rectifier
+    # 50% dropout
+    # Dense 800-unit layer with linear rectifier
+    # 50% dropout
+    # Dense output layer of 10 softmax units
     pass
 
 
@@ -33,7 +40,17 @@ def build_custom_mlp(input_var=None, depth=2, width=800, drop_input=.2, drop_hid
 
 
 def build_cnn(input_var=None):
+    # Input layer
+    # Convolution layer
+    # Max-pooling layer
+    # Convolution layer
+    # Max-pooling layer
+    # 50% dropout 
+    # Dense 256-unit layer with linear rectifier
+    # 50% dropout
+    # Dense output layer of 10 softmax units
     pass
+
 
 
 def main(model='mlp', num_epochs=500):
@@ -51,14 +68,16 @@ def main(model='mlp', num_epochs=500):
     # Compile a second function computing the validation loss and accuracy:
     # Launch the training loop:
     # - for epoch in range(num_epochs):
-    #   - for batch in iterate_minibatches(): 
-    #   x full pass over the training data 
-    #   x full pass over the validation data
+    #   - for batch in iterate_minibatches(): # full pass over training data 
+    #      - train and update the weights
+    #   - for batch in iterate_minibatches(): # full pass over validation data 
+    #      - accumulate error and accuracy
     # Compute and print the test error
     #   - for batch in iterate_minibatches(): 
+    #      - accumulate error and accuracy
     # Optionally, dump the network weights to a file
-
     print('Done')
+
     #assert False, "-- FORCED STOP --"
 
 
