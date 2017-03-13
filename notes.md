@@ -9,6 +9,7 @@ Create environment
 Activate environment
 - conda info -e
 - activate 'name'
+- deactivate 'name'
 
 Use
 - spyder
