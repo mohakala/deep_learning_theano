@@ -163,6 +163,8 @@ def main(model='mlp', num_epochs=2):  # original: num_epochs=500
     print("Loading data...")
     X_train, y_train, X_val, y_val, X_test, y_test = load_dataset()
 
+    print(X_train.shape, y_train.shape)
+
     # Prepare Theano variables for inputs and targets
     input_var = T.tensor4('inputs')
     target_var = T.ivector('targets')

@@ -65,17 +65,31 @@ def main(num_epochs=2):
     # Get data
 
     # Inputs and targets
+    
+    # In MNIST example the data is of the form:
+    # (50000, 1, 28, 28) and (50000,)
+    
     inputs = [
     [0, 0],
     [0, 1],
     [1, 0],
     [1, 1]
     ]
+    inputs = np.array(inputs).reshape(-1, 2)
+
     outputs = [1,0,0,1]
+    outputs = np.array(outputs)
+    
+    print('Data shapes:')
+    print(inputs.shape, outputs.shape)
 
     # Prepare Theano variables for inputs and targets
-    input_var = T.tensor4('inputs')
-    target_var = T.ivector('targets')
+    #input_var = T.tensor4('inputs')
+    #target_var = T.ivector('targets')
+
+    # In AV Theano example:
+    input_var = T.matrix('inputs')
+    target_var = T.vector('targets')
 
     # Create network
     network = build_mlp(input_var)
@@ -110,9 +124,37 @@ def main(num_epochs=2):
     pass
 
     # Launch the training loop
-    pass
+    print("Starting training...")
+    # We iterate over epochs:
+    for epoch in range(num_epochs):
+        # In each epoch, we do a full pass over the training data:
+        train_err = 0
+        train_batches = 0
+        start_time = time.time()
+        
+        #for batch in iterate_minibatches(X_train, y_train, 500, shuffle=True):
+        #    inputs, targets = batch
+        #    train_err += train_fn(inputs, targets)
+        #    train_batches += 1
 
+        inputs = inputs
+        targets = outputs 
+        print(inputs.shape)
+        print(targets.shape)
+        train_err += train_fn(inputs, targets)
 
+        # And a full pass over the validation data:
+        pass
+        
+        # Then we print the results for this epoch:
+        print("Epoch {} of {} took {:.3f}s".format(
+            epoch + 1, num_epochs, time.time() - start_time))
+        print("  training loss:\t\t{:.6f}".format(train_err / train_batches))
+        # print("  validation loss:\t\t{:.6f}".format(val_err / val_batches))
+        # print("  validation accuracy:\t\t{:.2f} %".format(
+        #     val_acc / val_batches * 100))
+    
+    
     # Compute and print test error
     pass
 
