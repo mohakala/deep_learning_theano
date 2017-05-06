@@ -3,6 +3,8 @@
 Created on Thu May  4 23:54:08 2017
 
 XOR gate with lasagne
+Follow example in
+ https://github.com/Lasagne/Lasagne/blob/master/examples/mnist.py
 @author: Mikko Hakala
 """
 
@@ -59,7 +61,7 @@ def build_mlp(input_var=None):
 def iterate_minibatches(inputs, targets, batchsize, shuffle=False):
     pass
 
-def main(): 
+def main(num_epochs=2): 
     # Get data
 
     # Inputs and targets
@@ -71,40 +73,41 @@ def main():
     ]
     outputs = [1,0,0,1]
 
-
-    
     # Prepare Theano variables for inputs and targets
     input_var = T.tensor4('inputs')
     target_var = T.ivector('targets')
 
-
     # Create network
     network = build_mlp(input_var)
 
+    # Loss expression for training, 
+    # i.e., a scalar objective we want to minimize
+    # http://lasagne.readthedocs.io/en/stable/modules/objectives.html
+    prediction = lasagne.layers.get_output(network)
+    loss = lasagne.objectives.squared_error(prediction, target_var)
+    loss = loss.mean()
+    # We could add some weight decay as well here, see lasagne.regularization.
 
-    # Create a loss expression for training
-    pass
-
-
-    # Create update expressions for training
-    pass
+    # Create update expressions for training, i.e., how to modify the
+    # parameters at each training step. Here, we'll use Stochastic Gradient
+    # Descent (SGD) with Nesterov momentum, but Lasagne offers plenty more.
+    params = lasagne.layers.get_all_params(network, trainable=True)
+    updates = lasagne.updates.nesterov_momentum(
+            loss, params, learning_rate=0.01, momentum=0.9)
 
 
     # Create a loss expression for validation/testing
     pass
+
     # Create an expression for the classification accuracy
     pass
 
-
-    # Compile a function performing a training step on a mini-batch 
-    pass
-
+    # Compile a function performing a training step on a mini-batch (by giving
+    # the updates dictionary) and returning the corresponding training loss:
+    train_fn = theano.function([input_var, target_var], loss, updates=updates)
 
     # Compile a second function computing the validation loss and accuracy
     pass
-
-
-
 
     # Launch the training loop
     pass
@@ -117,4 +120,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(num_epochs=10)
