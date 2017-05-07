@@ -42,22 +42,22 @@ def build_mlp(input_var=None):
     # No dropout layer
     l_in_drop = l_in
     
-    # Add a fully-connected layer of 20 units, using the linear rectifier, and
+    # Add a fully-connected layer of 2 units, using the linear rectifier, and
     # initializing weights with Glorot's scheme (which is the default anyway):
     l_hid1 = lasagne.layers.DenseLayer(
-            l_in_drop, num_units=20,
-            nonlinearity=lasagne.nonlinearities.rectify,
+            l_in_drop, num_units=2,
+            nonlinearity=lasagne.nonlinearities.sigmoid,
             W=lasagne.init.GlorotUniform())
 
-    # Another 20-unit layer:
-    l_hid2 = lasagne.layers.DenseLayer(
-            l_hid1, num_units=20,
-            nonlinearity=lasagne.nonlinearities.rectify)
+#    # Another 20-unit layer:
+#    l_hid2 = lasagne.layers.DenseLayer(
+#            l_hid1, num_units=2,
+#            nonlinearity=lasagne.nonlinearities.rectify)
 
     # Finally, we'll add the fully-connected output layer, of 1 softmax units:
     l_out = lasagne.layers.DenseLayer(
-            l_hid2, num_units=1,
-            nonlinearity=lasagne.nonlinearities.softmax)
+            l_hid1, num_units=1,
+            nonlinearity=lasagne.nonlinearities.sigmoid)
 
     return l_out
 
@@ -102,7 +102,8 @@ def main(num_epochs=2):
     # i.e., a scalar objective we want to minimize
     # http://lasagne.readthedocs.io/en/stable/modules/objectives.html
     prediction = lasagne.layers.get_output(network)
-    loss = lasagne.objectives.squared_error(prediction, target_var)
+    #loss = lasagne.objectives.squared_error(prediction, target_var)
+    loss = lasagne.objectives.binary_crossentropy(prediction, target_var)
     loss = loss.mean()
     # We could add some weight decay as well here, see lasagne.regularization.
 
@@ -124,6 +125,9 @@ def main(num_epochs=2):
     # the updates dictionary) and returning the corresponding training loss:
     train_fn = theano.function([input_var, target_var], loss, updates=updates)
 
+    # Compile a function to get the predictions
+    predicted_fn = theano.function([input_var], prediction)
+
     # Compile a second function computing the validation loss and accuracy
     pass
 
@@ -143,8 +147,8 @@ def main(num_epochs=2):
 
         inputs = inputs
         targets = outputs 
-        print(inputs.shape)
-        print(targets.shape)
+        #print(inputs.shape)
+        #print(targets.shape)
         train_err += train_fn(inputs, targets)
 
         # And a full pass over the validation data:
@@ -153,17 +157,28 @@ def main(num_epochs=2):
         # Then we print the results for this epoch:
         print("Epoch {} of {} took {:.3f}s".format(
             epoch + 1, num_epochs, time.time() - start_time))
-        print("  training loss:\t\t{:.6f}".format(train_err / train_batches))
+        print("  training loss:\t\t{:.6f}".format(train_err))
         # print("  validation loss:\t\t{:.6f}".format(val_err / val_batches))
         # print("  validation accuracy:\t\t{:.2f} %".format(
         #     val_acc / val_batches * 100))
+
+        # print('Predictions:')
+        # print(predicted_fn(inputs))
     
     
     # Compute and print test error
     pass
 
+    print('Training done')
+    print('  predictions:')
+    print(predicted_fn(inputs))
+
+
+    # TO DO: Make predictions
+    
+
     print('Done')
 
 
 if __name__ == '__main__':
-    main(num_epochs=10)
+    main(num_epochs=30000)
