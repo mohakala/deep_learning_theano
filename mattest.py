@@ -32,8 +32,12 @@ def build_mlp(input_var=None):
     # Input layer, specifying the expected input shape of the network
     # (unspecified batchsize, 1 channel, 4 rows and 2 columns) and
     # linking it to the given Theano variable `input_var`, if any:
-    l_in = lasagne.layers.InputLayer(shape=(None, 1, 4, 2),
+    # l_in = lasagne.layers.InputLayer(shape=(None, 1, 4, 2),
+    #                                  input_var=input_var)
+
+    l_in = lasagne.layers.InputLayer(shape=(4, 2),
                                      input_var=input_var)
+
 
     # No dropout layer
     l_in_drop = l_in
