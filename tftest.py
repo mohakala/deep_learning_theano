@@ -14,13 +14,17 @@ os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
 
 # Hello world          
+print('\nHello world')
 import tensorflow as tf
 sess = tf.Session()
 hello = tf.constant('Hello, TensorFlow!')
 print(sess.run(hello))
+sess.close()
+
 
 
 # Example 1 
+print('\nExample 1')
 
 # Graph
 a = tf.constant(5.0)

@@ -17,7 +17,8 @@ import tensorflow as tf
 
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
-# Don't report deprecation warnings
+# Use ERROR to not report deprecation warnings
+# Use INFO to report info during training
 tf.logging.set_verbosity(tf.logging.ERROR)
 
 
@@ -43,11 +44,13 @@ def main():
   # Specify that all features have real-value data
   feature_columns = [tf.contrib.layers.real_valued_column("", dimension=4)]
 
+
   # Build 3 layer DNN with 10, 20, 10 units respectively.
   classifier = tf.contrib.learn.DNNClassifier(feature_columns=feature_columns,
                                               hidden_units=[10, 20, 10],
                                               n_classes=3,
                                               model_dir="/tmp/iris_model")
+
 
   # Define the training inputs
   def get_train_inputs():
@@ -59,7 +62,7 @@ def main():
   #assert False, "x"
 
   # Fit model
-  classifier.fit(input_fn=get_train_inputs, steps=2000)
+  classifier.fit(input_fn=get_train_inputs, steps=10)
 
   #assert False, "x"
 
