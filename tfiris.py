@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 https://www.tensorflow.org/get_started/tflearn
-some modifications
+with some modifications
 """
 
 from __future__ import absolute_import
@@ -16,6 +16,9 @@ import numpy as np
 import tensorflow as tf
 
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
+
+# Don't report deprecation warnings
+tf.logging.set_verbosity(tf.logging.ERROR)
 
 
 # Data sets
@@ -45,6 +48,7 @@ def main():
                                               hidden_units=[10, 20, 10],
                                               n_classes=3,
                                               model_dir="/tmp/iris_model")
+
   # Define the training inputs
   def get_train_inputs():
     x = tf.constant(training_set.data)
@@ -52,8 +56,13 @@ def main():
 
     return x, y
 
-  # Fit model.
+  #assert False, "x"
+
+  # Fit model
   classifier.fit(input_fn=get_train_inputs, steps=2000)
+
+  #assert False, "x"
+
 
   # Define the test inputs
   def get_test_inputs():
@@ -74,11 +83,13 @@ def main():
       [[6.4, 3.2, 4.5, 1.5],
        [5.8, 3.1, 5.0, 1.7]], dtype=np.float32)
 
-  predictions = list(classifier.predict(input_fn=new_samples))
+  # predictions = list(classifier.predict(input_fn=new_samples))
+  predictions = list(classifier.predict_classes(input_fn=new_samples))
 
   print(
       "New Samples, Class Predictions:    {}\n"
       .format(predictions))
+
 
 if __name__ == "__main__":
     main()

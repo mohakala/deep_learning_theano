@@ -12,11 +12,32 @@ TensorFlow tests
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
-          
+
+# Hello world          
 import tensorflow as tf
 sess = tf.Session()
 hello = tf.constant('Hello, TensorFlow!')
 print(sess.run(hello))
+
+
+# Example 1 
+
+# Graph
+a = tf.constant(5.0)
+b = tf.constant(6.0)
+c = a * b
+
+# Launch the graph in a session and evaluate tensor c
+sess = tf.Session()
+print(sess.run(c))
+
+# Close
+sess.close()
+
+# Alternative close
+with tf.Session() as sess:
+  print(sess.run(c))
+
 
 
 
