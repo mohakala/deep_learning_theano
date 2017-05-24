@@ -9,6 +9,7 @@ Study the GAN example from
 
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 import sys
 sys.path.insert(0, 'C:\Python34\data-analysis-python')
@@ -20,19 +21,34 @@ os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
           
 class DataDistribution(object):
-    # Return samples from Gaussian distribution 
+    # Create samples from Gaussian distribution 
     def __init__(self):
-        self.mu = 2
+        self.mu = 1
         self.sigma = 0.5
 
-    def sample(self, N):
+    def sample_gauss(self, N):
         samples = np.random.normal(self.mu, self.sigma, N)
         samples.sort()
         return samples
 
+    def sample_lin(self, N):
+        samples = np.random.rand(N)
+        samples += range(N)
+        samples = samples/N
+        samples.sort()
+        return samples
+
+    def sample_sin(self, N):
+        # Samples from sin distribution        
+        # Random angles
+        xrand = np.random.rand(N) * 2 * np.pi
+        xrand.sort()
+        samples = np.sin(xrand)
+        return samples
+
 
 class GeneratorDistribution(object):
-    # Return input noise. 
+    # Return N input noise samples in the -range ... +range 
     # Input is stratified (samples uniformly in the range, then add noise)
     def __init__(self, range):
         self.range = range
@@ -90,12 +106,24 @@ def optimizer(loss, var_list):
     return optimizer
 
 
+def plot_hist(x, y):
+    # Continuous plotting of histograms  
+    plt.clf()
+    plt.hist(x, bins=15, alpha=0.75, label='true')
+    plt.hist(y, bins=15, alpha=0.75, label='generated to fool D')
+    # plt.xlim(-1, 3)
+    plt.legend()
+
+    # Interactive plotting
+    plt.pause(0.05)
+    # plt.show()    
+
 
 def main():
 
     hidden_size=4
-    num_steps=750
-    batch_size=5
+    num_steps=10000
+    batch_size=10
     
     print('Number of steps:', num_steps)
 
@@ -117,7 +145,7 @@ def main():
         # Check the output of discriminator for the forged value from G 
         D2 = discriminator(G, hidden_size)
 
-    # Loss of generator: Try to get close to true value
+    # Loss of generator: Try to get close to true sampling
     loss_g = tf.reduce_mean(-tf.log(D2))
 
     # Loss of discriminator: Minimize the two errors
@@ -136,11 +164,21 @@ def main():
 
 
     data=DataDistribution()
-    gen=GeneratorDistribution(5)
+    gen=GeneratorDistribution(3)
+    
+    # Auxiliary prints
+    print(data.sample_gauss(5))
+    print(data.sample_lin(5))
+    print(np.random.rand(5))
+    print(data.sample_sin(10))
 
+    # Turn on interactive plotting
+    plt.ion()
 
     with tf.Session() as session:
         tf.initialize_all_variables().run()
+
+        print('Loss in G and in D, mean and std of G')
 
         for step in range(num_steps):
             # update discriminator
@@ -154,47 +192,86 @@ def main():
         
             # Train the discriminator
             # Identical, works, since changed to xx
-            xx = data.sample(batch_size).reshape(-1,1)
+            xx = data.sample_gauss(batch_size).reshape(-1,1)
             zz = gen.sample(batch_size).reshape(-1,1)
             session.run([loss_d, opt_d], {
                     x: xx,
                     z: zz
             })
             # Train the generator
-            zz = gen.sample(batch_size)
+            zz = gen.sample(batch_size).reshape(-1,1)
             session.run([loss_g, opt_g], {
-                    z: np.reshape(zz, (batch_size, 1))
+                    z: zz
             })
-
+        
+            # Print the losses and distributions at some steps
+            if(step==2 or step%500==0):
+                zz = gen.sample(batch_size).reshape(-1,1)
+                forged = session.run(G, {z: zz})
+                print(step, session.run(loss_g, {z: zz }),              
+                      session.run(loss_d, {x: xx, z: zz }),
+                      np.mean(forged), np.std(forged)
+                     )
+                
+                true = xx  # true distribution
+                plot_hist(true, forged)
+    
  
-        # Print some results
-
-        test_batch_size=50
+        # After the models are trained, print some results
+        test_batch_size=200
 
         # Sampling from generator
         zz = gen.sample(test_batch_size)  # batch_size
         preds = session.run(G, {z: np.reshape(zz, (test_batch_size, 1)) })
         preds = sorted(preds)
-        print(type(preds))
+
+        print('Type of preds:', type(preds))
+        preds=np.asarray(preds)
+        print('Type of preds:', type(preds))
+
+        # Print loss for G
+        print('Loss for G:')
+        print(session.run(loss_g, {z: np.reshape(zz, (test_batch_size, 1)) }))
 
         # Sampling from true distribution
-        true = data.sample(test_batch_size) 
+        true = data.sample_gauss(test_batch_size) 
+        print('Type of trues:', type(true))
 
-        for i in range(50):
-            print(preds[i], true[i])
-
-        print('Generator mean and std:', np.mean(preds), np.std(preds))
-        print('True mean and std:', np.mean(true), np.std(true))
-
-
-        import matplotlib.pyplot as plt
-        plt.hist(true, bins='auto')  
-        plt.title("Histogram")
-        plt.show()
-        
-        
         # Get network weights
         pass # TODO             
+
+
+    # Turn off interactive plotting and show the last plot.
+    plt.ioff()
+    plt.show()
+
+    # Print predicted values
+    if(False):
+        print('Generated distr', 'True distr')
+        for i in range(test_batch_size):
+            print(preds[i], true[i])
+
+    print('Generator mean and std:', np.mean(preds), np.std(preds))
+    print('True mean and std:', np.mean(true), np.std(true))
+
+
+    # Plots  
+    plt.plot(true,'o', label='sampled true')
+    plt.plot(preds,'o', label='generated to fool D to misclassify')
+    plt.legend()
+    plt.title('True and forged data')
+    plt.show()
+
+    # Histograms  
+    plt.hist(true, bins=15, alpha=0.75, label='true')
+    plt.hist(preds, bins=15, alpha=0.75, label='generated to fool D')
+    plt.legend()
+    plt.show()    
+        
+        
+        
+        
+        
 
         
 
