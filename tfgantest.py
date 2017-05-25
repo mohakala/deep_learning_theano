@@ -77,7 +77,7 @@ def generator(input, hidden_size):
 
 
 def discriminator(input, hidden_size):
-    # Double amount of nodes. Input: tanh(wx + b)
+    # Double amount of nodes. Input: (wx + b) with activation tanh
     h0 = tf.tanh(linear(input, hidden_size * 2, 'd0'))
     h1 = tf.tanh(linear(h0, hidden_size * 2, 'd1'))
     h2 = tf.tanh(linear(h1, hidden_size * 2, 'd2'))
@@ -87,6 +87,9 @@ def discriminator(input, hidden_size):
 
 
 def optimizer(loss, var_list):
+    # Essentially: 
+    #  optimizer=tf.train.GradientDescentOptimizer(0.005)
+    #  train_step = optimizer.minimize(cross_entropy)  # == loss
     initial_learning_rate = 0.005
     decay = 0.95
     num_decay_steps = 150
@@ -155,6 +158,7 @@ def main():
 
 
     vars = tf.trainable_variables()
+    print('tf.trainable_variables:', vars)
     d_params = [v for v in vars if v.name.startswith('D/')]
     g_params = [v for v in vars if v.name.startswith('G/')]
 
