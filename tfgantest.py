@@ -20,17 +20,20 @@ os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
           
 class DataDistribution(object):
-    # Create samples from Gaussian distribution 
+    # Generate samples from various distributions 
+    # Return -- sorted samples
     def __init__(self):
         self.mu = 1
         self.sigma = 0.5
 
     def sample_gauss(self, N):
+        # N samples from gaussian with mu=1, sigma=0.5
         samples = np.random.normal(self.mu, self.sigma, N)
         samples.sort()
         return samples
 
     def sample_lin(self, N):
+        # N samples from linear function
         samples = np.random.rand(N)
         samples += range(N)
         samples = samples/N
@@ -38,7 +41,7 @@ class DataDistribution(object):
         return samples
 
     def sample_sin(self, N):
-        # Samples from sin distribution        
+        # N samples from sin distribution        
         # Random angles
         xrand = np.random.rand(N) * 2 * np.pi
         xrand.sort()
@@ -123,6 +126,8 @@ def plot_hist(x, y):
 
 def main():
 
+    tf.reset_default_graph()
+    
     hidden_size=4
     num_steps=10000
     batch_size=10
