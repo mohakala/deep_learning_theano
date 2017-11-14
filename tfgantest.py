@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 
 import sys
 sys.path.insert(0, 'C:\Python34\data-analysis-python')
-import mfunc as m
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
