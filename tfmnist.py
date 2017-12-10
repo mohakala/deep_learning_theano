@@ -14,6 +14,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
 def main():
     
+    tf.reset_default_graph()
+
     from tensorflow.examples.tutorials.mnist import input_data
     mnist = input_data.read_data_sets("../datasets/MNIST_data/", one_hot=True)                
             
@@ -68,41 +70,84 @@ def main():
     init = tf.global_variables_initializer()
     # init = tf.initialize_all_variables()  # gives warning
 
-    
     # Loss function
     cross_entropy = -tf.reduce_sum(Y_ * tf.log(Y))
- 
+    tf.summary.scalar('cross_entropy', cross_entropy)
+    
     # % of correct answers in a batch
     is_correct = tf.equal(tf.argmax(Y, 1), tf.argmax(Y_, 1))
     accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
+    tf.summary.scalar('accuracy', accuracy)
+
+    # Merged summary
+    merged = tf.summary.merge_all()
 
     # Optimizer and training step
     optimizer = tf.train.GradientDescentOptimizer(0.003)
     train_step = optimizer.minimize(cross_entropy)
 
     # Training loop
-    num_steps=3000
-    sess = tf.Session()
-    sess.run(init)
-    for i in range(num_steps):
-        # Load training data in batches
-        batch_X, batch_Y = mnist.train.next_batch(100)
-        train_data={X: batch_X, Y_: batch_Y}
-        
-        # Train
-        sess.run(train_step, feed_dict=train_data)
-        
-        # Print accuracy and cross-entropy
-        if(i%100==0):
-            acc, succ = sess.run([accuracy, cross_entropy], feed_dict=train_data)
-            test_data = {X: mnist.test.images, Y_: mnist.test.labels}
-            acc_test, succ_test = sess.run([accuracy, cross_entropy], feed_dict=test_data)
-            print('i, Acc, Cross-Ent:', i, acc, succ, '\tTest data:', acc_test, succ_test)
+    num_steps=1000
+    
+    ### tf.reset_default_graph()
+
+    with tf.Session() as sess:
+    # sess = tf.Session()   # Alternative to with tf.Session() as sess:
+    # if(True):             # Alternative ...
+        sess.run(init)
+
+        # Writer for tensorboard
+        writer = tf.summary.FileWriter("/tmp/mnist/2", graph=tf.get_default_graph())
 
 
+        for i in range(num_steps):
+            # Load training data in batches
+            batch_X, batch_Y = mnist.train.next_batch(100)
+            train_data={X: batch_X, Y_: batch_Y}
+        
+            # Train
+            sess.run(train_step, feed_dict=train_data)
+        
+            # Print accuracy and cross-entropy
+            if(i%100==0):
+                acc, succ = sess.run([accuracy, cross_entropy], feed_dict=train_data)
+                test_data = {X: mnist.test.images, Y_: mnist.test.labels}
+                acc_test, succ_test = sess.run([accuracy, cross_entropy], feed_dict=test_data)
+                print('i, Acc, Cross-Ent:', i, acc, succ, '\tTest data:', acc_test, succ_test)
+
+                # Write merged summaries for tensorboard
+                summary, _ = sess.run([merged, train_step], feed_dict=train_data)
+                writer.add_summary(summary, i)
+
+        # Write graph for tensorboard
+        writer.add_graph(sess.graph)
+
+        writer.flush() # These maybe don't have any influence...
+        writer.close() # These maybe don't have any influence...
+
+
+    print('Note:\tThere were some errors when rerunning the code')
+    print('\twith using summary..= merged, writer. But adding here in')
+    print('\tthe end or just in the beginning:')
+    print('\t  tf.reset_default_graph()')
+    print('\teliminates the error.')    
+    # tf.reset_default_graph()
+    # Links:
+    # 
 
     print('Done')
 
 
 if __name__ == "__main__":
     main()
+
+
+
+# Dump
+    # print('Strange workaround: Use "tf.reset_default_graph()" once')
+    # https://github.com/tensorflow/tensorflow/issues/225
+    # If I run scripts more than 2 times, including # placeholder, I faced same issue.
+    # first running,it works well.but after that,it just goes wrong like you.i have no idea about how to fix it. just restart jupyter.
+    # same error, can confirm mine was also a jupyter notebook problem. 
+    # I think this arises when running the graph definition more than 
+    # once (there are all sorts of problems with this!).
